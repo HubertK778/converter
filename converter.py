@@ -4,7 +4,7 @@ import os
 import json
 from pathlib import Path
 import yaml
-import xml.etree.ElementTree as ET
+import xmltodict
 
 def loadSourceFile(sourcePath, sourceExtension):
     try:
@@ -16,8 +16,7 @@ def loadSourceFile(sourcePath, sourceExtension):
             elif sourceExtension in ['.yaml', '.yml']:
                 return yaml.safe_load(content)
             elif sourceExtension == '.xml':
-                return ET.fromstring(content)
-            
+                return xmltodict.parse(content)
             return content
             
     except json.JSONDecodeError:
@@ -26,7 +25,7 @@ def loadSourceFile(sourcePath, sourceExtension):
     except yaml.YAMLError:
         print(f"Error: Invalid YAML format in {sourcePath}.")
         sys.exit(1)
-    except ET.ParseError:
+    except xmltodict.expat.ExpatError:
         print(f"Error: Invalid XML format in {sourcePath}.")
         sys.exit(1)
     except FileNotFoundError:
@@ -40,6 +39,13 @@ def convertToFile(sourceContent, targetPath, targetExtension):
                 json.dump(sourceContent, targetFile)
             elif targetExtension in ['.yaml', '.yml']:
                 yaml.safe_dump(sourceContent, targetFile)
+            elif targetExtension == '.xml':
+                if isinstance(sourceContent, dict):
+                    xml_content = xmltodict.unparse({ 'root': sourceContent }, pretty=True)
+                    targetFile.write(xml_content)
+                else:
+                    print(f"Error: Source content is not a valid XML dict for {targetPath}.")
+                    sys.exit(1)
     except Exception as error:
         print(f"Error: Could not write to {targetPath}. {error}")
         sys.exit(1)
