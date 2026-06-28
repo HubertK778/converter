@@ -32,6 +32,8 @@ def convertToFile(sourceContent, targetPath, targetExtension):
         with open(targetPath, 'w', encoding='utf-8') as targetFile:
             if targetExtension == '.json':
                 json.dump(sourceContent, targetFile)
+            elif targetExtension in ['.yaml', '.yml']:
+                yaml.safe_dump(sourceContent, targetFile)
     except Exception as error:
         print(f"Error: Could not write to {targetPath}. {error}")
         sys.exit(1)
