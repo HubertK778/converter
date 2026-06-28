@@ -4,6 +4,7 @@ import os
 import json
 from pathlib import Path
 import yaml
+import xml.etree.ElementTree as ET
 
 def loadSourceFile(sourcePath, sourceExtension):
     try:
@@ -14,6 +15,8 @@ def loadSourceFile(sourcePath, sourceExtension):
                 return json.loads(content)
             elif sourceExtension in ['.yaml', '.yml']:
                 return yaml.safe_load(content)
+            elif sourceExtension == '.xml':
+                return ET.fromstring(content)
             
             return content
             
@@ -22,6 +25,9 @@ def loadSourceFile(sourcePath, sourceExtension):
         sys.exit(1)
     except yaml.YAMLError:
         print(f"Error: Invalid YAML format in {sourcePath}.")
+        sys.exit(1)
+    except ET.ParseError:
+        print(f"Error: Invalid XML format in {sourcePath}.")
         sys.exit(1)
     except FileNotFoundError:
         print(f"Error: File not found - {sourcePath}.")
