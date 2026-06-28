@@ -3,6 +3,7 @@ import sys
 import os
 import json
 from pathlib import Path
+import yaml
 
 def loadSourceFile(sourcePath, sourceExtension):
     try:
@@ -10,10 +11,17 @@ def loadSourceFile(sourcePath, sourceExtension):
             content = sourceFile.read()
 
             if sourceExtension == '.json':
-                content = json.loads(content)
-                return content
-    except json.JSONDecodeError as error:
+                return json.loads(content)
+            elif sourceExtension in ['.yaml', '.yml']:
+                return yaml.safe_load(content)
+            
+            return content
+            
+    except json.JSONDecodeError:
         print(f"Error: Invalid JSON format in {sourcePath}.")
+        sys.exit(1)
+    except yaml.YAMLError:
+        print(f"Error: Invalid YAML format in {sourcePath}.")
         sys.exit(1)
     except FileNotFoundError:
         print(f"Error: File not found - {sourcePath}.")
